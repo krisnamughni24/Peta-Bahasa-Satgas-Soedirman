@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Peta Bahasa Satgas Soedirman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:wght@600..800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: Satgas Soedirman design system, Field theme: disciplined, honourable, operational.
+   IDEA: a command-room map console, template A (map + side panel) on one screen.
+   PICTURE: 3D Java relief; height = speakers, colour = dialect/language.
+   COLOUR and TYPE: navy chrome + 2px gold rule on cream; Playfair titles, Archivo caps, Plex Sans/Mono.
+   LAYOUT: 56px chrome, then map (flex) | 380px side panel filling the viewport; stacks below 980px. */
+:root{color-scheme:light dark;
+--navy:#13274A;--navy-d:#0B1A33;--gold:#C59A4A;--gold-l:#E3C68A;--gold-s:#F5EAD0;--maroon:#7E1622;--cream:#F6EBD3;
+--bg:light-dark(#F5EFE3,#0A1528);--surface:light-dark(#FFFDF8,#11223F);--surface-2:light-dark(#EFE6D3,#172C4F);--line:light-dark(#E2D6BE,#263F69);--line-strong:light-dark(#8F8063,#5A77A6);
+--ink:light-dark(#0F1D38,#F3EAD6);--muted:light-dark(#5E6577,#A9B1C2);--gold-ink:light-dark(#7D5A1C,#E3C68A);
+--accent:light-dark(#13274A,#E3C68A);--accent-ink:light-dark(#F6EBD3,#0B1A33);--accent-soft:light-dark(#E4E9F2,#1F3760);
+--chrome:light-dark(#13274A,#071122);--chrome-muted:#C9C2B1;--map-ground:light-dark(#DDE3EC,#0E1C33);--map-label:light-dark(#5E6577,#8C97AD);
+--shadow:light-dark(0 1px 2px rgba(15,29,56,.06),0 1px 2px rgba(0,0,0,.4));
+--f-d:"Playfair Display",Georgia,serif;--f-c:Archivo,"Helvetica Neue",Arial,sans-serif;--f-b:"IBM Plex Sans",system-ui,sans-serif;--f-m:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/20px var(--f-b);display:flex;flex-direction:column;overflow:hidden}
+.cap{font-family:var(--f-c);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--f-m);font-variant-numeric:tabular-nums}
+header{background:var(--chrome);color:var(--cream);border-bottom:2px solid var(--gold);flex:none}
+.bar{display:flex;align-items:center;gap:14px;padding:8px 20px;min-height:60px}
+.logo{height:44px;width:auto;flex:none}
+.brand small{display:block;font:700 11px/14px var(--f-c);letter-spacing:.3em;color:var(--gold-l);text-transform:uppercase}
+.brand b{font:700 19px/24px var(--f-d)}
+.pre{display:inline-flex;align-items:center;gap:6px;font:700 11px/14px var(--f-c);letter-spacing:.14em;text-transform:uppercase;color:#0B1A33;background:var(--gold-l);padding:4px 8px;border-radius:4px;white-space:nowrap}
+.pre::before{content:'';width:6px;height:6px;border-radius:50%;background:#7E1622}
+.stamp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px}
+.stamp .pill{font-size:12px;line-height:16px;font-weight:600;padding:2px 8px;border-radius:4px;background:light-dark(#F7EBD2,#3A2E17);color:light-dark(#8A5D12,#E0A84B);white-space:nowrap}
+.rd{margin-left:auto;display:flex;align-items:center;gap:10px;text-align:right}
+.rd small{display:block;font:600 11px/14px var(--f-c);letter-spacing:.09em;color:var(--chrome-muted);text-transform:uppercase}
+.rd b{display:block;font:800 15px/18px var(--f-c);letter-spacing:.22em;color:var(--gold-l)}
+.rd span{display:block;font-size:12px;line-height:16px;color:var(--chrome-muted)}
+.rdm{width:34px;height:38px;border-radius:6px 6px 18px 18px;background:var(--navy);border:2px solid var(--gold);color:var(--gold-l);display:grid;place-items:center;font:800 13px var(--f-d);flex:none}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:12px;padding:12px;min-height:0}
+.map{position:relative;background:var(--map-ground);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-height:0}
+.map canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.tools{position:absolute;left:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap;z-index:2}
+select,.btn{min-height:40px;font:600 14px var(--f-b);padding:0 12px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer;max-width:100%}
+select{font-weight:400;font-size:16px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lab{position:absolute;left:0;top:0;pointer-events:none;font:800 11px/14px var(--f-c);letter-spacing:.16em;text-transform:uppercase;color:var(--map-label);white-space:nowrap;transform:translate(-50%,-50%)}
+.tip{position:absolute;z-index:4;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);padding:6px 10px;border-radius:8px;font-size:13px;white-space:nowrap;display:none;box-shadow:0 8px 24px rgba(15,29,56,.12)}
+.hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
+.selc{position:absolute;left:12px;right:12px;bottom:12px;z-index:3;display:none;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:8px 8px 8px 12px;box-shadow:0 8px 24px rgba(15,29,56,.16);animation:up .35s cubic-bezier(.2,.8,.2,1)}
+.selc div{flex:1}.selc b{display:block;font:700 16px/20px var(--f-d)}.selc span{font-size:12px;color:var(--muted)}
+.selc .btn{min-height:40px;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.det.flash{animation:fl .6s ease}@keyframes fl{0%{box-shadow:0 0 0 0 rgba(197,154,74,.55)}100%{box-shadow:0 0 0 10px rgba(197,154,74,0)}}
+.err{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+aside{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:auto;padding-right:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.eb{font:700 12px/16px var(--f-c);letter-spacing:.3em;text-transform:uppercase;color:var(--gold-ink);margin:0}
+h1{font:700 24px/30px var(--f-d);margin:2px 0 4px}
+.desc{color:var(--muted);margin:0;font-size:13px;line-height:18px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:12px;padding:8px 10px}
+.kpi b{display:block;font:700 26px/30px var(--f-d);font-variant-numeric:lining-nums tabular-nums}
+.kpi span{font-size:12px;line-height:15px;color:var(--muted);display:block}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;margin:6px 0 10px}
+.seg button{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);min-height:38px;padding:4px 8px;font:600 13px var(--f-b);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:600 12px var(--f-b);cursor:pointer}
+.chip i,.lg i,.sw{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;line-height:16px;color:var(--muted);margin-top:10px}
+.lg span{display:inline-flex;align-items:center;gap:5px}
+.ramp{display:inline-block;width:110px;height:10px;border-radius:2px;background:linear-gradient(90deg,#F2ECDF,#C59A4A,#13274A)}
+.det{position:relative}
+.det h2{font:700 22px/28px var(--f-d);margin:0;padding-right:40px}
+.det .x{position:absolute;right:8px;top:8px;width:40px;height:40px;border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer;border-radius:8px}
+.mini{display:flex;gap:18px;margin:8px 0 6px}
+.mini b{display:block;font:700 26px/30px var(--f-d)}
+.mini span{font-size:12px;color:var(--muted)}
+.rw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;margin:8px 0;font-size:13px}
+.rw em{font-style:normal;color:var(--muted);font-family:var(--f-m);font-size:12px}
+.tr{grid-column:1/-1;display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-2)}
+.tr span{height:100%}
+.sub{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+.top{list-style:none;margin:6px 0 0;padding:0}
+.top li button{width:100%;display:grid;grid-template-columns:1.6em minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font:13px var(--f-b);text-align:left;cursor:pointer;min-height:36px}
+.top li button:hover{background:var(--surface-2)}
+.top li b{font-family:var(--f-m);font-weight:500;color:var(--gold-ink)}
+.top em{font-style:normal;font-family:var(--f-m);font-size:12px;color:var(--muted)}
+.off{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.off span{font-size:12px;padding:2px 8px;border-radius:4px;background:var(--surface-2);color:var(--ink)}
+.off span b{font-family:var(--f-m);font-weight:500;margin-left:4px}
+.foot{font-size:12px;line-height:16px;color:var(--muted);margin:0}
+.foot a{color:var(--gold-ink);font-weight:600}
+@media(max-width:980px){.selc.on{display:flex}body{overflow:auto;height:auto}main{grid-template-columns:minmax(0,1fr)}.map{height:62vh;min-height:380px}aside{overflow:visible}.rd span,.rd small{display:none}}
+@media(max-width:560px){.pre{display:none}.brand small{letter-spacing:.18em;white-space:nowrap}.map{height:56vh;min-height:340px}.tools{right:12px}.tools select{flex:1}.kpis{gap:6px}.seg button{font-size:12px}main{padding:8px;gap:8px}.bar{padding:8px 12px;gap:10px}.brand b{font-size:16px;line-height:20px}.logo{height:40px}.rd b{font-size:13px;letter-spacing:.14em}.rdm{display:none}.hint{display:none}.kpi b{font-size:22px}}
+
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header><div class="bar">
+<img class="logo" src="__LOGO__" alt="Logo P3MDI Soedirman">
+<div class="brand"><small>Satgas Soedirman</small><b>Peta Bahasa Daerah Serdik</b></div>
+<span class="pre" title="Preliminary mapping, Grup 1, 2, 3, per 15/11/2026 pukul 13.00 WIB">Preliminary</span>
+<div class="rd"><div><small>Disusun oleh</small><b>RISDIKTI</b><span>Bagian Riset, Pendidikan, dan Teknologi · Senat P3MDI</span></div><div class="rdm" aria-hidden="true">R</div></div>
+</div></header>
+<main>
+<section class="map" id="fig" aria-label="Peta 3D Pulau Jawa">
+<div class="tools"><select id="pick" aria-label="Pilih kabupaten/kota"><option value="">Pilih kabupaten/kota…</option></select><button class="btn" id="reset" type="button">Tampilan awal</button></div>
+<div class="tip" id="tip"></div><div id="labs"></div>
+<div class="selc" id="selc"><div><b id="selN"></b><span id="selS"></span></div><button class="btn" id="selGo" type="button">Rincian ↓</button></div>
+<p class="hint">Seret untuk memutar · gulir/cubit untuk zoom · klik kanan seret untuk menggeser</p>
+</section>
+<aside>
+<div class="card">
+<p class="eb">Preliminary mapping – Kemampuan bahasa daerah</p>
+<div class="stamp"><span class="pill">Grup 1, 2, 3</span><span class="pill">Per 15/11/2026 · 13.00 WIB</span></div>
+<h1>Kekuatan tutur ada di koridor Mataraman dan Arekan</h1>
+<p class="desc">Hampir seluruh Jawa didominasi Bahasa Jawa; tinggi blok berbeda karena tiap dialek dipetakan ke wilayah tuturnya sendiri.</p>
+</div>
+<div class="kpis" id="kpis"></div>
+<div class="card">
+<div class="cap">Indikator</div>
+<div class="seg" id="modes" role="group" aria-label="Pilih indikator"></div>
+<div class="cap">Bahasa</div>
+<div class="chips" id="chips" role="group" aria-label="Saring bahasa"></div>
+<div class="lg" id="leg" aria-live="polite"></div>
+</div>
+<div class="card det" id="det" aria-live="polite"></div>
+<p class="foot">Wilayah = wilayah tutur bahasa/dialek, bukan asal serdik. Data: Rekap Bahasa Daerah Satgas Sudirman (Grup 1, 2, 3), per 15/11/2026 13.00 WIB. Referensi persebaran: <a href="https://repositori.kemendikdasmen.go.id/7191/1/Peta%20Bahasa%202017.compressed-min%20%28pdf.io%29.pdf" target="_blank" rel="noopener">Peta Bahasa, Badan Bahasa 2017</a>.</p>
+</aside>
+</main>
+<script>window.DATA=__DATA__;</script>
+<script type="module">
+{
+const D=window.DATA,R=D.regions;
+const LC={Jawa:'#8A5F14',Sunda:'#2F5F9F',Betawi:'#A3202C',Madura:'#5E2A6E',Cirebon:'#A63E62',Osing:'#2F8A82'};
+const DC={'Mataraman':'#7D4A12','Arekan / Jawa Timuran':'#C59A4A','Ngapak / Banyumasan':'#6F7F2E','Pesisiran / Semarangan':'#3F7F8C','Pekalongan':'#5F5AA2','Kedu':'#B5655A','Samin / Blora':'#6E5B4A','Jawa umum':'#DCC497','Sunda Priangan':'#2F5F9F','Sunda Bogor':'#86A6D6','Sunda Wetan':'#13274A','Betawi':'#A3202C','Madura':'#5E2A6E','Cirebon':'#A63E62','Osing':'#2F8A82'};
+const LV=[['Fasih','#13274A'],['Menengah','#5A77A6'],['Dasar','#B9C6DC'],['Belum dicantumkan','#C9C2B1']];
+const EMPTY=(()=>{const p=document.createElement('i');p.style.cssText='position:absolute;visibility:hidden;color:var(--surface-2)';document.body.append(p);const c=getComputedStyle(p).color;p.remove();return /^rgb/.test(c)?c:'#E5D9C0'})();
+const MODES=[['jumlah','Jumlah penutur'],['dialek','Dialek dominan'],['fasih','Penutur fasih'],['ragam','Keragaman dialek']];
+let mode='dialek',filter='',api=null;
+const RA=['#F2ECDF','#C59A4A','#13274A'];
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const ramp=t=>{t=Math.max(0,Math.min(1,t));const i=t<.5?0:1,u=t<.5?t*2:(t-.5)*2,a=hex(RA[i]),b=hex(RA[i+1]);return'#'+a.map((x,j)=>Math.round(x+(b[j]-x)*u).toString(16).padStart(2,'0')).join('')};
+const grpOf=(r,lang)=>Object.entries(r.d).filter(([g])=>!lang||D.gl[g]===lang);
+const dom=r=>{let b='',n=0;for(const l in r.l)if(r.l[l][0]>n){n=r.l[l][0];b=l}return b};
+const val=r=>mode==='fasih'?(filter?(r.l[filter]?.[1]||0):r.f):mode==='ragam'?grpOf(r,filter).length:(filter?(r.l[filter]?.[0]||0):r.t);
+function colr(r,n,mx){
+  if(!n)return EMPTY;
+  if(mode==='fasih')return ramp(n/(filter?(r.l[filter]?.[0]||1):r.t));
+  if(mode==='ragam')return ramp(n/mx);
+  if(mode==='dialek'){const gs=grpOf(r,filter).sort((a,b)=>b[1][0]-a[1][0]||(a[0]==='Jawa umum')-(b[0]==='Jawa umum'));return DC[gs[0][0]]||'#777'}
+  return filter?LC[filter]:(LC[dom(r)]||'#777');
+}
+const totals={};R.forEach(r=>{for(const l in r.l)totals[l]=Math.max(totals[l]||0,r.l[l][0])});
+const langs=Object.keys(LC).filter(l=>totals[l]);
+const covered=R.filter(r=>r.t).length;
+document.getElementById('kpis').innerHTML=[[D.k.serdik,'serdik terdata'],[D.k.reg,'kuasai bahasa daerah'],[`${covered}/${R.length}`,'daerah Jawa tercakup']].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join('');
+const modesEl=document.getElementById('modes'),chips=document.getElementById('chips'),leg=document.getElementById('leg'),det=document.getElementById('det'),pick=document.getElementById('pick');
+modesEl.innerHTML=MODES.map(([k,t])=>`<button type="button" data-m="${k}" aria-pressed="${k===mode}">${t}</button>`).join('');
+chips.innerHTML=`<button class="chip" type="button" data-l="" aria-pressed="true">Semua</button>`+langs.map(l=>`<button class="chip" type="button" data-l="${l}" aria-pressed="false"><i style="background:${LC[l]}"></i>${l}</button>`).join('');
+function legend(){
+  if(mode==='dialek'){const used=new Set();R.forEach(r=>grpOf(r,filter).forEach(([g])=>used.add(g)));leg.innerHTML=Object.keys(DC).filter(g=>used.has(g)).map(g=>`<span><i style="background:${DC[g]}"></i>${g}</span>`).join('')}
+  else if(mode==='fasih')leg.innerHTML=`<span>Tinggi = penutur fasih · warna = porsi fasih</span><span>0%<i class="ramp"></i>100%</span>`;
+  else if(mode==='ragam')leg.innerHTML=`<span>Jumlah dialek/bahasa yang wilayahnya mencakup daerah</span><span>sedikit<i class="ramp"></i>banyak</span>`;
+  else leg.innerHTML=langs.map(l=>`<span><i style="background:${LC[l]}"></i>${l}</span>`).join('')+'<span>· tinggi = jumlah penutur</span>';
+}
+const unit=()=>mode==='ragam'?'dialek':mode==='fasih'?'fasih':'serdik';
+function home(){
+  const top=[...R].sort((a,b)=>val(b)-val(a)).slice(0,6);
+  const off=Object.entries(D.off).sort((a,b)=>b[1]-a[1]);
+  det.innerHTML=`<div class="cap">Daerah teratas · ${MODES.find(m=>m[0]===mode)[1]}${filter?' · '+filter:''}</div><ul class="top">${top.map((r,i)=>`<li><button type="button" data-n="${r.n}"><b>${i+1}</b><span>${r.n}</span><em>${val(r)} ${unit()}</em></button></li>`).join('')}</ul><div class="sub"><div class="cap">Bahasa tanpa wilayah tutur di Jawa</div><div class="off">${off.map(([l,n])=>`<span>${l}<b>${n}</b></span>`).join('')}</div></div>`;
+}
+function panel(r){
+  const ls=Object.entries(r.l).sort((a,b)=>b[1][0]-a[1][0]),gs=Object.entries(r.d).sort((a,b)=>b[1][0]-a[1][0]);
+  det.innerHTML=`<button class="x" id="close" type="button" aria-label="Tutup">×</button><div class="cap">${r.p}</div><h2>${r.n}</h2>`+(r.t?`<div class="mini"><div><b>${r.t}</b><span>serdik penutur</span></div><div><b>${r.f}</b><span>fasih</span></div><div><b>${gs.length}</b><span>dialek/bahasa</span></div></div>
+  <div class="sub"><div class="cap">Per dialek/ragam</div>${gs.map(([g,v])=>`<div class="rw"><span><i class="sw" style="background:${DC[g]||'#777'};margin-right:6px"></i>${g}</span><em>${v[0]} · ${v[1]} fasih</em></div>`).join('')}</div>
+  <div class="sub"><div class="cap">Per bahasa · tingkat kemahiran</div>${ls.map(([l,v])=>`<div class="rw"><span>${l}</span><em>${v[0]} serdik</em><div class="tr">${v.slice(1).map((c,i)=>c?`<span style="width:${c/v[0]*100}%;background:${LV[i][1]}" title="${LV[i][0]}: ${c}"></span>`:'').join('')}</div></div>`).join('')}<div class="lg">${LV.map(x=>`<span><i style="background:${x[1]}"></i>${x[0]}</span>`).join('')}</div></div>`
+  :`<p class="desc" style="margin-top:8px">Belum ada entri bahasa yang wilayah tuturnya tertaut ke daerah ini pada Referensi Wilayah Bahasa. Untuk Bahasa Jawa umum, referensi hanya mencantumkan kabupaten contoh.</p>`);
+  document.getElementById('close').onclick=()=>{api?api.select(null,true):home()};
+}
+det.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(!b)return;api?api.pick(b.dataset.n):panel(R.find(r=>r.n===b.dataset.n))});
+[...R].sort((a,b)=>a.n.localeCompare(b.n)).forEach(r=>{const o=document.createElement('option');o.value=r.n;o.textContent=`${r.n} (${r.p})`;pick.append(o)});
+const refresh=()=>{legend();api&&api.paint();if(!api||!api.sel())home()};
+modesEl.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;mode=b.dataset.m;modesEl.querySelectorAll('button').forEach(c=>c.setAttribute('aria-pressed',c===b));refresh()});
+chips.addEventListener('click',ev=>{const b=ev.target.closest('.chip');if(!b)return;filter=b.dataset.l;chips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));refresh()});
+legend();home();
+const fig=document.getElementById('fig'),tip=document.getElementById('tip'),selc=document.getElementById('selc'),selN=document.getElementById('selN'),selS=document.getElementById('selS');
+document.getElementById('selGo').onclick=()=>det.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+try{
+  const THREE=await import('three');const {OrbitControls}=await import('three/addons/controls/OrbitControls.js');
+  const ren=new THREE.WebGLRenderer({antialias:true,alpha:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
+  fig.prepend(ren.domElement);
+  const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(38,1,.5,900);
+  const ctl=new OrbitControls(cam,ren.domElement);ctl.enableDamping=true;ctl.maxPolarAngle=1.35;ctl.minDistance=6;ctl.maxDistance=420;
+  scene.add(new THREE.HemisphereLight(0xfffdf8,0x3a4a66,1.25));
+  const sun=new THREE.DirectionalLight(0xffffff,1.6);sun.position.set(-30,60,35);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  Object.assign(sun.shadow.camera,{left:-60,right:60,top:30,bottom:-30,near:1,far:200});scene.add(sun);
+  const sea=new THREE.Mesh(new THREE.PlaneGeometry(600,400),new THREE.ShadowMaterial({opacity:.2}));sea.rotation.x=-Math.PI/2;sea.receiveShadow=true;scene.add(sea);
+  const S=10,LON=110.3,LAT=-7.3,P=(x,y)=>new THREE.Vector2((x-LON)*S,(y-LAT)*S);
+  const grp=new THREE.Group();grp.rotation.x=-Math.PI/2;scene.add(grp);
+  const meshes=[],provC={};
+  R.forEach(r=>{
+    const shapes=r.g.map(poly=>{const sh=new THREE.Shape(poly[0].map(c=>P(...c)));poly.slice(1).forEach(h=>sh.holes.push(new THREE.Path(h.map(c=>P(...c)))));return sh});
+    const geo=new THREE.ExtrudeGeometry(shapes,{depth:1,bevelEnabled:false});
+    const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:EMPTY,roughness:.85,metalness:0}));m.castShadow=m.receiveShadow=true;m.userData={r,h:.05,th:.05};m.scale.z=.05;
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,40),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.35})));
+    grp.add(m);meshes.push(m);
+    geo.computeBoundingBox();const c=new THREE.Vector3();geo.boundingBox.getCenter(c);m.userData.c=new THREE.Vector3(c.x,0,-c.y);
+    (provC[r.p]=provC[r.p]||[]).push(m.userData.c);
+  });
+  const labs=document.getElementById('labs'),plab=Object.entries(provC).map(([p,cs])=>{const v=cs.reduce((a,b)=>a.add(b),new THREE.Vector3()).divideScalar(cs.length);const d=document.createElement('div');d.className='lab';d.textContent=p;labs.append(d);if(p==='DI Yogyakarta')v.z+=4;if(p==='DKI Jakarta')v.z-=3;return{d,v:v.setY(.3)}});
+  function paint(){const mx=Math.max(1,...R.map(val));meshes.forEach(m=>{const r=m.userData.r,n=val(r);m.userData.th=.05+(n/mx)*5.2;m.material.color.set(colr(r,n,mx))})}
+  const ringMat=new THREE.MeshBasicMaterial({color:0xC59A4A,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,depthTest:false});
+  const rings=[0,1].map(()=>{const r=new THREE.Mesh(new THREE.RingGeometry(.93,1,96),ringMat.clone());r.rotation.x=-Math.PI/2;r.position.y=.04;r.visible=false;r.renderOrder=5;scene.add(r);return r});
+  let pulseR=1,pulseT=0;
+  let hover=null,sel=null,fly=null;const home3={p:new THREE.Vector3(),t:new THREE.Vector3(-4.5,0,1)};
+  function size(){const w=fig.clientWidth,h=fig.clientHeight;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();const d=Math.min(cam.aspect<1?125:230,60/(Math.tan(19*Math.PI/180)*cam.aspect));home3.p.copy(home3.t).add(new THREE.Vector3(0,d*.78,d*.62))}
+  new ResizeObserver(size).observe(fig);size();cam.position.copy(home3.p);ctl.target.copy(home3.t);
+  const mk=(t,p,d)=>({t,p,d,s:performance.now(),t0:ctl.target.clone(),p0:cam.position.clone(),arc:Math.min(18,cam.position.distanceTo(p)*.18)});
+  ctl.addEventListener('start',()=>{fly=null});
+  const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
+  const hit=ev=>{const b=ren.domElement.getBoundingClientRect();ptr.set((ev.clientX-b.left)/b.width*2-1,-(ev.clientY-b.top)/b.height*2+1);ray.setFromCamera(ptr,cam);const h=ray.intersectObjects(meshes,false)[0];return h?h.object:null};
+  const glow=(m,v)=>{if(!m)return;m.material.emissive.set(v);const on=v===0x6a4a10;m.children[0].material.color.set(on?0xE3C68A:0xffffff);m.children[0].material.opacity=on?1:.35};
+  ren.domElement.addEventListener('pointermove',ev=>{const m=hit(ev);if(m!==hover){if(hover&&hover!==sel)glow(hover,0);hover=m;if(m&&m!==sel)glow(m,0x2a2a2a)}
+    if(m){const r=m.userData.r,b=fig.getBoundingClientRect();tip.style.display='block';tip.textContent=`${r.n} · ${val(r)} ${unit()}`;tip.style.left=Math.min(ev.clientX-b.left+14,b.width-tip.offsetWidth-8)+'px';tip.style.top=(ev.clientY-b.top+14)+'px';ren.domElement.style.cursor='pointer'}else{tip.style.display='none';ren.domElement.style.cursor=''}});
+  ren.domElement.addEventListener('pointerleave',()=>tip.style.display='none');
+  let down=null;ren.domElement.addEventListener('pointerdown',ev=>down=[ev.clientX,ev.clientY]);
+  ren.domElement.addEventListener('pointerup',ev=>{if(!down||Math.hypot(ev.clientX-down[0],ev.clientY-down[1])>6)return;const m=hit(ev);if(m)select(m)});
+  const reduce=false;
+  function select(m,toHome){
+    if(sel)glow(sel,0);sel=m;
+    if(m){glow(m,0x6a4a10);panel(m.userData.r);pick.value=m.userData.r.n;
+      const rr=m.userData.r;selN.textContent=rr.n;selS.textContent=`${rr.t} serdik · ${rr.f} fasih · ${Object.keys(rr.d).length} dialek/bahasa`;selc.classList.remove('on');void selc.offsetWidth;selc.classList.add('on');
+      det.classList.remove('flash');void det.offsetWidth;det.classList.add('flash');
+      if(innerWidth>980){const as=det.parentElement;as.scrollTo({top:det.offsetTop-as.offsetTop-12,behavior:reduce?'auto':'smooth'})}
+      const c=m.userData.c.clone().setY(m.userData.h*.5),bb=new THREE.Box3().setFromObject(m),sz=bb.getSize(new THREE.Vector3()),f=Math.min(1.2,Math.max(.45,Math.max(sz.x,sz.z)/14));
+      const za=Math.max(1,1.25/cam.aspect);fly=mk(c,c.clone().add(new THREE.Vector3(0,26*f*za,13*f*za)),1300);
+      pulseR=Math.max(sz.x,sz.z)*.6+.5;pulseT=0;if(!reduce)m.userData.h+=1.6;rings.forEach(r=>{r.position.x=m.userData.c.x;r.position.z=m.userData.c.z;r.visible=true});
+      if(innerWidth<=980&&fig.getBoundingClientRect().top<-40)fig.scrollIntoView({behavior:reduce?'auto':'smooth'});
+    }else{if(innerWidth>980)det.parentElement.scrollTo({top:0,behavior:reduce?'auto':'smooth'});if(toHome)fly=mk(home3.t.clone(),home3.p.clone(),1200);pick.value='';home();rings.forEach(r=>r.visible=false);selc.classList.remove('on')}
+  }
+  api={select,paint,sel:()=>sel,pick:n=>{const m=meshes.find(x=>x.userData.r.n===n);m&&select(m)}};
+  pick.onchange=()=>pick.value?api.pick(pick.value):select(null,true);
+  document.getElementById('reset').onclick=()=>select(null,true);
+  const v=new THREE.Vector3();
+  (function loop(){requestAnimationFrame(loop);
+    meshes.forEach(m=>{const d=m.userData,t=d.th+((m===hover||m===sel)&&d.th>.06?.35:0)+(m===sel&&!reduce?.22*Math.sin(pulseT*4.5):0);d.h+=(t-d.h)*(reduce?1:.12);m.scale.z=d.h});
+    if(fly){const k=Math.min(1,(performance.now()-fly.s)/fly.d),e=k<.5?4*k*k*k:1-(-2*k+2)**3/2;ctl.target.lerpVectors(fly.t0,fly.t,e);cam.position.lerpVectors(fly.p0,fly.p,e);cam.position.y+=Math.sin(Math.PI*k)*fly.arc;if(k>=1)fly=null}
+    if(sel){pulseT+=1/60;const ph=(pulseT%1.4)/1.4;rings.forEach((r,i)=>{r.position.y=sel.userData.h+.08;const p=(ph+i*.5)%1,s=reduce?pulseR:pulseR*(.55+p*.85);r.scale.set(s,s,s);r.material.opacity=reduce?.7:(1-p)*.95});const k=reduce?.6:.45+.35*Math.sin(pulseT*4.5);sel.material.emissive.setRGB(.42*k,.29*k,.06*k);sel.children[0].material.opacity=.6+.4*k}
+    ctl.update();ren.render(scene,cam);
+    const w=fig.clientWidth,h=fig.clientHeight;plab.forEach(o=>{v.copy(o.v).project(cam);const vis=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;o.d.style.display=vis?'block':'none';o.d.style.left=((v.x+1)/2*w)+'px';o.d.style.top=((1-v.y)/2*h)+'px'});
+  })();
+  paint();
+}catch(e){console.error(e);const d=document.createElement('div');d.className='err';d.textContent='Peta 3D tidak dapat dimuat di perangkat ini (WebGL tidak tersedia). Gunakan daftar "Pilih kabupaten/kota" untuk melihat rincian.';fig.append(d);
+  pick.onchange=()=>{const r=R.find(x=>x.n===pick.value);r?panel(r):home()};}
+}
+</script>
+</body>
+</html>
