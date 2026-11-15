@@ -1,6 +1,9 @@
 """Build index.html from the language recap workbook.
 
-Usage: python scripts/build.py <rekap.xlsx> <all_kabkota_ind.geojson>
+Usage: python scripts/build.py <rekap.xlsx> <all_kabkota_ind.geojson> [form_responses.csv ...]
+
+Each optional CSV is a Google Form export ("Form PRELIMINARY MAPPING KEMAMPUAN BAHASA DAERAH")
+whose rows are appended to the workbook's Detail Bahasa rows.
 Requires: pandas, openpyxl, shapely.
 """
 import json,collections,re
@@ -35,6 +38,35 @@ def group(lang,basis):
         return 'Sunda Priangan'
     return lang
 d=pd.read_excel(F,'Detail Bahasa',dtype={'No. Helm':str})
+# Form option -> (language, dialect key in Referensi Wilayah Bahasa)
+FORM_DIALECT={
+    'jawa mataraman':('Jawa','Mataraman'),'jawa arekan':('Jawa','Arekan'),'jawa pesisiran':('Jawa','Pesisir'),
+    'jawa banyumasan':('Jawa','Ngapak'),'jawa cirebonan':('Cirebon',''),'sunda priangan':('Sunda','Priangan'),
+    'sunda cirebon':('Sunda',''),'sunda banten':('Sunda',''),'betawi':('Betawi',''),'osing banyuwangi':('Osing','Osing (Banyuwangi)')}
+FORM_LEVEL={'fasih':'Fasih','aktif':'Menengah','dasar':'Dasar','pasif':'Dasar'}  # passive understanding counts as Dasar
+def load_form(path):
+    """Turn one form export into Detail Bahasa-like rows (one per language/dialect)."""
+    c=pd.read_csv(path,dtype=str)
+    rows=[]
+    for _,x in c.iterrows():
+        helm=str(x.iloc[1]).strip().zfill(3)
+        lvl=FORM_LEVEL.get(str(x.iloc[10]).split(':')[0].strip().lower())
+        if not lvl: continue  # "Tidak bisa sama sekali": Indonesian only
+        chosen={'Jawa' if 'jawa'==t.strip().lower() else 'Sunda' if t.strip().lower()=='sunda' else 'Osing' if t.strip().lower().startswith('osing') else None for t in str(x.iloc[8]).split(';')}-{None}
+        got=set()
+        for t in str(x.iloc[9]).split(';'):
+            t=t.strip().lower()
+            for key,(lang,dia) in FORM_DIALECT.items():
+                if t.startswith(key):
+                    rows.append({'No. Helm':helm,'Bahasa':lang,'Dialek/Subbahasa':dia or None,'Tingkat Kemahiran':lvl})
+                    got.add('Jawa' if lang=='Cirebon' else lang)
+        for lang in chosen-got:  # language ticked without a dialect -> general entry
+            rows.append({'No. Helm':helm,'Bahasa':lang,'Dialek/Subbahasa':None,'Tingkat Kemahiran':lvl})
+    return pd.DataFrame(rows),set(c.iloc[:,1].str.strip().str.zfill(3))
+FORM_HELMS=set()
+for fp in sys.argv[3:]:
+    fr,hs=load_form(fp); FORM_HELMS|=hs
+    d=pd.concat([d,fr],ignore_index=True)
 w=pd.read_excel(F,'Referensi Wilayah Bahasa'); w.columns=['b','dia','prov','kab','basis']
 REF={(r.b,'' if pd.isna(r.dia) else r.dia):('' if pd.isna(r.kab) else r.kab, '' if pd.isna(r.basis) else r.basis) for r in w.itertuples()}
 def ref(lang,dia):
@@ -96,7 +128,7 @@ reg=set()
 for _,r in d.iterrows():
     ls=[L(x) for x in str(r['Bahasa']).split(';')]
     if any(l not in ('Indonesia','Arab','Mandarin','Hokkien') for l in ls): reg.add(r['No. Helm'])
-k={'serdik':len(m),'reg':len(reg)}
+k={'serdik':len(set(m['No. Helm'].astype(str).str.zfill(3))|FORM_HELMS),'reg':len(reg)}
 tpl=open(os.path.join(ROOT,'src','template.html')).read()
 logo='data:image/png;base64,'+base64.b64encode(open(os.path.join(ROOT,'assets','logo-p3mdi.png'),'rb').read()).decode()
 data['k']=k

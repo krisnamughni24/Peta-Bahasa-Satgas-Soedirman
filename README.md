@@ -1,8 +1,8 @@
 # Peta Bahasa Satgas Soedirman
 
-Interactive 3D map of regional-language capability among Serdik of Satgas Soedirman (Grup 1, 2, 3), across 119 regencies/cities in Java.
+Interactive 3D map of regional-language capability among Serdik of Satgas Soedirman (Grup 1, 2, 3, 4), across 119 regencies/cities in Java.
 
-**Status:** Preliminary mapping, data as of 15/11/2026, 13.00 WIB.
+**Status:** Preliminary mapping, data as of 15/11/2026, 17.45 WIB.
 Prepared by **Risdikti** (Bagian Riset, Pendidikan, dan Teknologi), Senat P3MDI.
 
 ## What it shows
@@ -28,10 +28,11 @@ Regions are **speech areas** of a language or dialect, not a Serdik's origin or 
 
 ```bash
 pip install pandas openpyxl shapely
-python scripts/build.py path/to/Rekap_Bahasa_Daerah.xlsx path/to/all_kabkota_ind.geojson
+python scripts/build.py path/to/Rekap_Bahasa_Daerah.xlsx path/to/all_kabkota_ind.geojson path/to/form_grup4.csv
 ```
 
 - The workbook needs the sheets `Master Anggota`, `Detail Bahasa` and `Referensi Wilayah Bahasa`. It holds personal data, so do not commit it.
+- Optional CSV arguments are Google Form exports (Grup 4 was collected this way). Form dialect options are mapped to keys in `Referensi Wilayah Bahasa`; "Aktif" counts as Menengah and "Pasif" as Dasar; "Tidak bisa sama sekali" and Indonesian-only answers add no regional language. CSVs hold names too and are git-ignored.
 - Speech areas are taken from `Referensi Wilayah Bahasa` and matched on language and dialect. The region columns in `Detail Bahasa` are not used, because 19 of its rows were shifted.
 - Regency boundaries: `kota/all_kabkota_ind.geojson` from [eppofahmi/geojson-indonesia](https://github.com/eppofahmi/geojson-indonesia).
 
